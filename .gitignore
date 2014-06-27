@@ -1,0 +1,12 @@
+
+# build files
+
+build-*
+
+# user specific files
+
+*.user
+
+# other
+
+www/*
