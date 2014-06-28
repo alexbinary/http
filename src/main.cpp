@@ -1,14 +1,13 @@
 #include <QCoreApplication>
 
-#include "httpserver.h"
-
-#include <QDebug>
+#include "threadedtcpserver.h"
 
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-    HttpServer http;    // server starts upon creation
+    ThreadedTcpServer server;
+    server.start();
 
     return a.exec();
 }

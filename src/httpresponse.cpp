@@ -1,12 +1,14 @@
 #include "httpresponse.h"
 
 #include <QTextStream>
-
 #include <QDebug>
+
+#define SERVER_NAME "http-indev"
 
 HttpResponse::HttpResponse()
 {
     mDirty = true;
+    mHeadDirty = true;
 }
 
 HttpResponse HttpResponse::buildResponse(int status, const QString &mimeType, const QByteArray &body)
@@ -52,6 +54,26 @@ QByteArray HttpResponse::raw() const
 {
     if(mDirty) {
 
+        mRaw.clear();
+        QTextStream responseStream(&mRaw);
+
+        responseStream << rawHead();
+
+        responseStream << mBody;
+        responseStream << "\r\n";
+
+        responseStream.flush();
+
+        mDirty = false;
+    }
+
+    return mRaw;
+}
+
+QByteArray HttpResponse::rawHead() const
+{
+    if(mHeadDirty) {
+
         /*
          * Content-Length header is required for the client to know
          * when all the data has been received
@@ -70,9 +92,15 @@ QByteArray HttpResponse::raw() const
         if(!headers.contains("Content-Length")) {
             headers["Content-Length"] = QString::number(mBody.size());
         }
+        if(!headers.contains("Content-Length")) {
+            headers["Content-Length"] = QString::number(mBody.size());
+        }
+        if(!headers.contains("Server")) {
+            headers["Server"] = SERVER_NAME;
+        }
 
-        mRaw.clear();
-        QTextStream responseStream(&mRaw);
+        mRawHead.clear();
+        QTextStream responseStream(&mRawHead);
 
         responseStream << "HTTP/1.1 " << mStatus;
         responseStream << "\r\n";
@@ -83,15 +111,12 @@ QByteArray HttpResponse::raw() const
         }
 
         responseStream << "\r\n";
-        responseStream << mBody;
-        responseStream << "\r\n";
-
         responseStream.flush();
 
-        mDirty = false;
+        mHeadDirty = false;
     }
 
-    return mRaw;
+    return mRawHead;
 }
 
 void HttpResponse::setBody(const QByteArray &body)
@@ -117,16 +142,19 @@ void HttpResponse::setHeader(const QString &header, const QString &value)
 {
     mHeaders[header] = value;
     mDirty = true;
+    mHeadDirty = true;
 }
 
 void HttpResponse::setMimeType(const QString &mimeType)
 {
     mMimeType = mimeType;
     mDirty = true;
+    mHeadDirty = true;
 }
 
 void HttpResponse::setStatus(int status)
 {
     mStatus = status;
     mDirty = true;
+    mHeadDirty = true;
 }

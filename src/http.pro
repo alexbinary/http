@@ -14,11 +14,13 @@ CONFIG   -= app_bundle
 TEMPLATE = app
 
 SOURCES += main.cpp \
-    httpserver.cpp \
     httpresponse.cpp \
-    httprequest.cpp
+    httprequest.cpp \
+    httpconnectionhandler.cpp \
+    threadedtcpserver.cpp
 
 HEADERS += \
-    httpserver.h \
     httpresponse.h \
-    httprequest.h
+    httprequest.h \
+    httpconnectionhandler.h \
+    threadedtcpserver.h

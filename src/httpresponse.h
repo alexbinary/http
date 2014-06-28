@@ -11,6 +11,7 @@ public:
     HttpResponse();
 
     QByteArray raw() const;
+    QByteArray rawHead() const;
     void setStatus(int);
     void setMimeType(const QString&);
     void setHeader(const QString& header,const QString& value);
@@ -25,7 +26,9 @@ public:
 
 private:
     mutable QByteArray mRaw;
+    mutable QByteArray mRawHead;
     mutable bool mDirty;
+    mutable bool mHeadDirty;
 
     QString mMimeType;
     int mStatus;

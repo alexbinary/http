@@ -1,48 +1,45 @@
-#ifndef HTTPSERVER_H
-#define HTTPSERVER_H
+#ifndef HTTPCONNECTIONHANDLER_H
+#define HTTPCONNECTIONHANDLER_H
 
 #include <QObject>
-#include <QTcpServer>
 #include <QTcpSocket>
 
 #include "httprequest.h"
 #include "httpresponse.h"
 
-class HttpServer : public QObject
+class HttpConnectionHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit HttpServer(QObject *parent = 0);
+    explicit HttpConnectionHandler(int socketDescriptor,QObject *parent = 0);
 
 public slots:
-    void newConnection();
-    void acceptError(QAbstractSocket::SocketError);
+    void start();
+
+signals:
+    void connectionClosed();
 
 private:
-    void error(QString);
-    void info(QString);
-
-    QString guessMimeTypeFromFileName(const QString&);
-
-    void processRequest(HttpRequest req);
     HttpResponse responseForRequest(const HttpRequest&);
-
     HttpResponse buildStatusResponse(int status);
     HttpResponse buildFileResponse(const QString& filePath);
+    QString guessMimeTypeFromFileName(const QString&);
+    void processRequest(HttpRequest req);
     void sendResponse(const HttpResponse&);
     void sendStatusResponse(int status);
-
     void serveFile(const QString& filePath);
+    void error(QString);
+    void info(QString);
 
 private slots:
     void socketDisconnected();
     void socketReadyRead();
     void socketError(QAbstractSocket::SocketError);
-    void onAboutToQuit();
 
 private:
-    QTcpServer* mTcpServer;
+    int mConnectionId;
+    int mSocketDescriptor;
     QTcpSocket* mTcpSocket;
 };
 
-#endif // HTTPSERVER_H
+#endif // HTTPCONNECTIONHANDLER_H
